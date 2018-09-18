@@ -1,11 +1,11 @@
 {
-	"ModId": "reloaded.demos.helloworld",
-	"ModName": "Reloaded Template Mod",
-	"ModDescription": "Reloaded Template which prints \"Hello World\" to the console output on launch.",
+	"ModId": "sonicheroes.utils.filetablehook",
+	"ModName": "File Table Hook",
+	"ModDescription": "Deal away with pesky long startup times and playing ADXes only from real dvdroot.",
 	"ModVersion": "1.0.0",
 	"ModAuthor": "Sewer56",
-	"ModSite": "https://github.com/sewer56lol/Reloaded-Mod-Loader",
-	"ModSource": "https://github.com/sewer56lol/Reloaded-Mod-Loader",
+	"ModSite": "",
+	"ModSource": "",
 	"ConfigurationFile": "",
 	"Dependencies": []
 }

@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\build\Debug\Default-Mods\Reloaded-Mod-Template\</OutputPath>
+    <OutputPath>C:\Users\sewer\AppData\Roaming\Reloaded-Mod-Loader\Reloaded-Mods\Sonic-Heroes\FileTable-Hook\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -29,7 +29,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\build\Release\Default-Mods\Reloaded-Mod-Template\</OutputPath>
+    <OutputPath>C:\Users\sewer\AppData\Roaming\Reloaded-Mod-Loader\Reloaded-Mods\Sonic-Heroes\FileTable-Hook\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>2</WarningLevel>
@@ -74,7 +74,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Github-Release|AnyCPU'">
-    <OutputPath>bin\Github-Release\</OutputPath>
+    <OutputPath>C:\Users\sewer\AppData\Roaming\Reloaded-Mod-Loader\Reloaded-Mods\Sonic-Heroes\FileTable-Hook\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Github-Release|x86'">
     <OutputPath>bin\x86\Github-Release\</OutputPath>
@@ -93,6 +93,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Heroes\CRI\FileEntry.cs" />
+    <Compile Include="Heroes\CRI\FileTable.cs" />
+    <Compile Include="Heroes\CRI\NewFileInfoTuple.cs" />
+    <Compile Include="Heroes\FileTableFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ReloadedTemplate\Client.cs" />
@@ -106,7 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="libReloaded">
-      <Version>2.0.0</Version>
+      <Version>2.1.0</Version>
     </PackageReference>
     <PackageReference Include="libReloaded-Paths">
       <Version>2.0.0</Version>
@@ -114,12 +118,16 @@
     <PackageReference Include="LiteNetLib-custom">
       <Version>0.0.1</Version>
     </PackageReference>
+    <PackageReference Include="Vanara.PInvoke.Kernel32">
+      <Version>1.1.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Banner.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>move /Y "$(TargetDir)\Reloaded\*" "$(TargetDir)"
