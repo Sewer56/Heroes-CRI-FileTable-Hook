@@ -1,11 +1,11 @@
 {
-	"ModId": "sonicheroes.utils.filetablehook",
-	"ModName": "File Table Hook",
-	"ModDescription": "Deal away with pesky long startup times and playing ADXes only from real dvdroot.",
-	"ModVersion": "1.0.0",
-	"ModAuthor": "Sewer56",
-	"ModSite": "",
-	"ModSource": "",
-	"ConfigurationFile": "",
-	"Dependencies": []
+  "ModId": "sonicheroes.utils.filetablehook",
+  "ModName": "File Table Hook",
+  "ModDescription": "Deal away with pesky long startup times, filesize issues on CRI formats when using Redirector and playing CRIWARE (ADX, SFD etc.) files only from real dvdroot.",
+  "ModVersion": "1.0.0",
+  "ModAuthor": "Sewer56",
+  "ModSite": "",
+  "ModSource": "https://github.com/sewer56lol/Heroes-CRI-FileTable-Hook",
+  "ConfigurationFile": "",
+  "Dependencies": []
 }
