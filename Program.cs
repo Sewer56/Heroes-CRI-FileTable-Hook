@@ -3,13 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
-using Microsoft.Win32.SafeHandles;
-using Reloaded;
-using Reloaded.Assembler;
 using Reloaded.Process;
 using Reloaded.Process.Buffers;
 using Reloaded.Process.Functions.X86Hooking;
@@ -128,7 +121,24 @@ namespace Reloaded_Mod_Template
         private static FunctionHook<FileTable.BuildFileTable> _buildFileTableHook;
         private static FunctionHook<FileTable.GetFileEntryFromFilePath> _getFileEntryFromPathHook;
         private static MemoryBuffer _memoryBuffer;
-        private static Dictionary<string, IntPtr> _structMapper;
+        private static Dictionary<string, FileEntryMapping> _structMapper;
+
+        /// <summary>
+        /// Represents a tuple of a C# file entry and a native file entry.
+        /// No attempt is made at synchronization of the two entries, this is merely for
+        /// keeping the C# file entry in memory such that the GC does not release any file handles.
+        /// </summary>
+        private struct FileEntryMapping
+        {
+            public FileEntry*           NativeFileEntry;
+            public FileEntrySharp       FileEntry;
+
+            public FileEntryMapping(FileEntry* nativeFileEntry, FileEntrySharp fileEntry)
+            {
+                NativeFileEntry = nativeFileEntry;
+                FileEntry = fileEntry;
+            }
+        }
 
         /// <summary>
         /// Entry point.
@@ -143,7 +153,7 @@ namespace Reloaded_Mod_Template
             // 10000 files capacity
             IntPtr bufferLocation       = GameProcess.AllocateMemory(2550000);
             _memoryBuffer               = new MemoryBuffer(bufferLocation, 2550000, true);
-            _structMapper               = new Dictionary<string, IntPtr>();
+            _structMapper               = new Dictionary<string, FileEntryMapping>();
 
             _getFileEntryFromPathHook   = FunctionHook<FileTable.GetFileEntryFromFilePath>.Create(0x006D00F0, GetFileEntryFromPathImpl).Activate();
             _buildFileTableHook         = FunctionHook<FileTable.BuildFileTable>.Create(0x006D63B0, BuildFileTableHookImpl).Activate();
@@ -169,35 +179,61 @@ namespace Reloaded_Mod_Template
         private static FileEntry* GetFileEntryFromPathImpl(string fullFilePath)
         {
             // If file already exists, return it.
-            if (_structMapper.TryGetValue(fullFilePath, out IntPtr result))
+            if (IsFileLocked(new FileInfo(fullFilePath)))
             {
-                return (FileEntry*) result;
+                if (_structMapper.TryGetValue(fullFilePath, out FileEntryMapping result))
+                {
+                    return result.NativeFileEntry;
+                }
             }
 
             // Create new file entry if not already exist.
-            FileEntry newFileEntry  = new FileEntry();
-            newFileEntry.FileName   = (char*)_memoryBuffer.Add(Encoding.ASCII.GetBytes(fullFilePath));
-            newFileEntry.FileHandle = (int)Kernel32.CreateFile(fullFilePath, Kernel32.FileAccess.FILE_ALL_ACCESS,
-                                                               FileShare.ReadWrite, new SECURITY_ATTRIBUTES(), FileMode.Open,
-                                                               FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL, IntPtr.Zero).DangerousGetHandle();
-            newFileEntry.FileSize   = Kernel32.GetFileSize(new SafeFileHandle((IntPtr)newFileEntry.FileHandle, true), out uint lpFileSizeHigh);
-            
+            FileEntrySharp newFileEntry = new FileEntrySharp();
+            newFileEntry.FileName = fullFilePath;
+            newFileEntry.FileHandle = Kernel32.CreateFile(fullFilePath, Kernel32.FileAccess.FILE_ALL_ACCESS,
+                                                 FileShare.ReadWrite, new SECURITY_ATTRIBUTES(), FileMode.Open,
+                                                 FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL);
+            newFileEntry.FileSize = Kernel32.GetFileSize(newFileEntry.FileHandle, out uint lpFileSizeHigh);
+
             // Set next entry to last mapped value if possible.
             if (_structMapper.Values.Count > 0)
-            {
-                newFileEntry.NextEntry = (FileEntry*)_structMapper.Values.Last();
-            }
+                newFileEntry.NextEntry = (FileEntry*)_structMapper.Values.Last().NativeFileEntry;
             else
-            {
                 newFileEntry.NextEntry = (FileEntry*)0;
-            }
             
             // Append to buffer.
-            IntPtr newFileEntryPtr = _memoryBuffer.Add(newFileEntry);
-            _structMapper[fullFilePath] = newFileEntryPtr;
+            FileEntry  nativeFileEntry    = newFileEntry.GetFileEntry(_memoryBuffer);
+            FileEntry* nativeFileEntryPtr = (FileEntry*)_memoryBuffer.Add(nativeFileEntry);
+            _structMapper[fullFilePath]   = new FileEntryMapping(nativeFileEntryPtr, newFileEntry);
 
             // Return pointer to file entry.
-            return (FileEntry*)newFileEntryPtr;
+            return nativeFileEntryPtr;
+        }
+
+        public static bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
         }
     }
 }
