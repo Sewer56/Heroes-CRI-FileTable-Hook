@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Reloaded.Process;
 using Reloaded.Process.Buffers;
 using Reloaded.Process.Functions.X86Hooking;
@@ -190,9 +191,10 @@ namespace Reloaded_Mod_Template
             // Create new file entry if not already exist.
             FileEntrySharp newFileEntry = new FileEntrySharp();
             newFileEntry.FileName = fullFilePath;
-            newFileEntry.FileHandle = Kernel32.CreateFile(fullFilePath, Kernel32.FileAccess.FILE_ALL_ACCESS,
+            newFileEntry.FileHandle = Kernel32.CreateFile(fullFilePath, Kernel32.FileAccess.FILE_GENERIC_READ | Kernel32.FileAccess.FILE_GENERIC_WRITE,
                                                  FileShare.ReadWrite, new SECURITY_ATTRIBUTES(), FileMode.Open,
                                                  FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL);
+
             newFileEntry.FileSize = Kernel32.GetFileSize(newFileEntry.FileHandle, out uint lpFileSizeHigh);
 
             // Set next entry to last mapped value if possible.
