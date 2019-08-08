@@ -7,6 +7,13 @@
 	<p>C# based universal mod loader framework compatible with arbitrary processes.</p>
 </div>
 
+# Deprecated
+
+This mod has been replaced by the [new implementation](https://github.com/Sewer56/CriFsHook.ReloadedII) for the [Reloaded-II](https://github.com/Reloaded-Project/Reloaded-II) mod loader.
+
+The new implementation is universal and supports more games than just Sonic Heroes.
+
+However this repository remains for both archive and informational reasons.
 
 # About This Project
 
